@@ -616,18 +616,16 @@ React = {
   }
 };
 
-//       React_type4:  setState
+      // React_type4:  setState
 var HelloMessage = React.createClass({
   getInitialState: function() {
     return {type: 'say:'};
   },
   changeType: function(){
-    console.log( this, 'this2' ); // todo 指向document？
     this.setState({type:'shout:'})
   },
   render: function() {
-    console.log( this, 'this1' );
-    return React.createElement("div", {onclick: this.changeType}, this.state.type, "Hello ", this.props.name);
+    return React.createElement("div", {onclick: this.changeType.bind(this)}, this.state.type, "Hello ", this.props.name);
   }
 });
 
