@@ -130,7 +130,7 @@ ReactDOMComponent.prototype._updateDOMChildren = function(nextChildrenElements){
 
 
 //差异更新的几种类型: 移动， 卸载， 添加
-var UPATE_TYPES = {
+var UPDATE_TYPES = {
   MOVE_EXISTING: 1,
   REMOVE_NODE: 2,
   INSERT_MARKUP: 3
@@ -138,6 +138,12 @@ var UPATE_TYPES = {
 
 // 普通的children是一个数组，此方法把它转换成一个map,key就是element的key,
 //   如果是text节点或者element创建时并没有传入key,就直接用在数组里的index标识
+
+// 这里的flattenChildren需要给予很大的关注，比如对于一个表格列表，我们在最前面插入了一条数据，
+// 想一下如果我们创建element时没有传入key，所有的key都是null,
+// 这样reactjs在generateComponentChildren时就会默认通过顺序（index）来一一对应改变前跟改变后的子节点，
+// 这样变更前与变更后的对应节点判断（_shouldUpdateReactComponent）其实是不合适的。
+//   也就是说对于这种列表的情况，我们最好给予唯一的标识key，这样reactjs找对应关系时会更方便一点。
 function flattenChildren(componentChildren) {
   var child;
   var name;
@@ -152,8 +158,10 @@ function flattenChildren(componentChildren) {
 
 
 //主要用来生成子节点elements的component集合
-//这边注意，有个判断逻辑，如果发现是更新，就会继续使用以前的componentInstance,调用对应的receiveComponent。
-//如果是新的节点，就会重新生成一个新的componentInstance，
+// generateComponentChildren 会尽量的复用以前的component，也就是那些坑，
+//   当发现可以复用component（也就是key一致）时，
+//     就还用以前的，只需要调用他对应的更新方法receiveComponent就行了，这样就会递归的去获取子节点的差异对象然后放到队列了。
+//   如果发现不能复用那就是新的节点，我们就需要instantiateReactComponent重新生成一个新的component。
 function generateComponentChildren(prevChildren, nextChildrenElements) {
   var nextChildren = {};
   nextChildrenElements = nextChildrenElements || [];
@@ -196,15 +204,15 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
   var nextChildren = generateComponentChildren(prevChildren, nextChildrenElements);
 
   //重新赋值_renderedChildren，使用最新的。
-  self._renderedChildren = []
+  self._renderedChildren = [];
   $.each(nextChildren, function(key, instance) {
     self._renderedChildren.push(instance);
-  })
+  });
 
 
   var nextIndex = 0; //代表到达的新的节点的index
   //通过对比两个集合的差异，组装差异节点添加到队列中
-  for (name in nextChildren) {
+  for (var name in nextChildren) {
     if (!nextChildren.hasOwnProperty(name)) {
       continue;
     }
@@ -216,7 +224,7 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
       diffQueue.push({
         parentId: self._rootNodeID,
         parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
-        type: UPATE_TYPES.MOVE_EXISTING,
+        type: UPDATE_TYPES.MOVE_EXISTING,
         fromIndex: prevChild._mountIndex,
         toIndex: nextIndex
       })
@@ -227,10 +235,10 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
         diffQueue.push({
           parentId: self._rootNodeID,
           parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
-          type: UPATE_TYPES.REMOVE_NODE,
+          type: UPDATE_TYPES.REMOVE_NODE,
           fromIndex: prevChild._mountIndex,
           toIndex: null
-        })
+        });
 
         //如果以前已经渲染过了，记得先去掉以前所有的事件监听，通过命名空间全部清空
         if (prevChild._rootNodeID) {
@@ -243,7 +251,7 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
       diffQueue.push({
         parentId: self._rootNodeID,
         parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
-        type: UPATE_TYPES.INSERT_MARKUP,
+        type: UPDATE_TYPES.INSERT_MARKUP,
         fromIndex: null,
         toIndex: nextIndex,
         markup: nextChild.mountComponent() //新增的节点，多一个此属性，表示新节点的dom内容
@@ -263,7 +271,7 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
       diffQueue.push({
         parentId: self._rootNodeID,
         parentNode: $('[data-reactid=' + self._rootNodeID + ']'),
-        type: UPATE_TYPES.REMOVE_NODE,
+        type: UPDATE_TYPES.REMOVE_NODE,
         fromIndex: prevChild._mountIndex,
         toIndex: null
       })
@@ -273,7 +281,7 @@ ReactDOMComponent.prototype._diff = function(diffQueue, nextChildrenElements) {
       }
     }
   }
-}
+};
 
 // 属性的变更并不是特别复杂，主要就是找到以前老的不用的属性直接去掉，新的属性赋值，并且注意其中特殊的事件属性做出特殊处理就行了。
 ReactDOMComponent.prototype._updateDOMProperties = function(lastProps, nextProps) {
@@ -315,6 +323,62 @@ ReactDOMComponent.prototype._updateDOMProperties = function(lastProps, nextProps
     $('[data-reactid="' + this._rootNodeID + '"]').prop(propKey, nextProps[propKey])
   }
 
+};
+
+//用于将childNode插入到指定位置
+function insertChildAt(parentNode, childNode, index) {
+  var beforeChild = parentNode.children().get(index);
+  beforeChild ? childNode.insertBefore(beforeChild) : childNode.appendTo(parentNode);
+}
+
+// 主要就是挨个遍历差异队列，遍历两次，第一次删除掉所有需要变动的节点，然后第二次插入新的节点还有修改的节点。
+// 这里为什么可以直接挨个的插入呢？
+// 原因就是我们在diff阶段添加差异节点到差异队列时，本身就是有序的，
+// 也就是说对于新增节点（包括move和insert的）在队列里的顺序就是最终dom的顺序，所以我们才可以挨个的直接根据index去塞入节点。
+ReactDOMComponent.prototype._patch = function(updates) {
+  var update;
+  var initialChildren = {};
+  var deleteChildren = [];
+  for (var i = 0; i < updates.length; i++) {
+    update = updates[i];
+    if (update.type === UPDATE_TYPES.MOVE_EXISTING || update.type === UPDATE_TYPES.REMOVE_NODE) {
+      var updatedIndex = update.fromIndex;
+      var updatedChild = $(update.parentNode.children().get(updatedIndex));
+      var parentID = update.parentID;
+
+      //所有需要更新的节点都保存下来，方便后面使用
+      initialChildren[parentID] = initialChildren[parentID] || [];
+      //使用parentID作为简易命名空间
+      initialChildren[parentID][updatedIndex] = updatedChild;
+
+
+      //所有需要修改的节点先删除,对于move的，后面再重新插入到正确的位置即可
+      deleteChildren.push(updatedChild)
+    }
+
+  }
+
+  //删除所有需要先删除的
+  $.each(deleteChildren, function(index, child) {
+    $(child).remove();
+  });
+
+
+  //再遍历一次，这次处理新增的节点，还有修改的节点这里也要重新插入
+  for (var k = 0; k < updates.length; k++) {
+    update = updates[k];
+    switch (update.type) {
+      case UPDATE_TYPES.INSERT_MARKUP:
+        insertChildAt(update.parentNode, $(update.markup), update.toIndex);
+        break;
+      case UPDATE_TYPES.MOVE_EXISTING:
+        insertChildAt(update.parentNode, initialChildren[update.parentID][update.fromIndex], update.toIndex);
+        break;
+      case UPDATE_TYPES.REMOVE_NODE:
+        // 什么都不需要做，因为上面已经帮忙删除掉了
+        break;
+    }
+  }
 };
 
 //定义ReactClass类,所有自定义的超级父类: createClass
@@ -503,7 +567,8 @@ React = {
       this.state = this.getInitialState ? this.getInitialState() : null;
     };
 
-    //原型继承，继承超级父类
+    //原型继承，继承超级父类 todo： 并没有继承父类， why？
+
     Constructor.prototype = new ReactClass();
     Constructor.prototype.constructor = Constructor;
 
@@ -556,11 +621,13 @@ var HelloMessage = React.createClass({
   getInitialState: function() {
     return {type: 'say:'};
   },
-  changeType:function(){
+  changeType: function(){
+    console.log( this, 'this2' ); // todo 指向document？
     this.setState({type:'shout:'})
   },
   render: function() {
-    return React.createElement("div", {onclick:this.changeType}, this.state.type, "Hello ", this.props.name);
+    console.log( this, 'this1' );
+    return React.createElement("div", {onclick: this.changeType}, this.state.type, "Hello ", this.props.name);
   }
 });
 
