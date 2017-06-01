@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div id="container">
+  1e32653
+</div>
+
+<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+<script src="../react.min.js"> </script>
+<script src="../react-with-addons.js"> </script>
+<script src="../react-dom.min.js"> </script>
+
+<script type="text/babel">
+  var MyComponent = React.createClass({
+    getInitialState: function(){
+      console.log('getInitialState');
+      return {};
+    },
+
+    getDefaultProps: function(){
+      console.log('getDefaultProps');
+      return {};
+    },
+
+    componentWillMount: function(){
+      console.log('componentWillMount');
+    },
+
+    componentDidMount: function(){
+      console.log('componentDidMount');
+    },
+
+    componentWillReceiveProps: function(){
+      console.log('componentWillReceiveProps');
+    },
+
+    shouldComponentUpdate: function(){
+      console.log('shouldComponentUpdate');
+      return true;
+    },
+
+    componentWillUpdate: function(){
+      console.log('componentWillUpdate');
+    },
+
+    componentDidUpdate: function(){
+      console.log('componentDidUpdate');
+    },
+
+    componentWillUnmount: function(){
+      console.log('componentWillUnmount');
+    },
+
+    render: function(){
+      console.log('render');
+      return null;
+    }
+  });
+  var container = document.getElementById('container');
+  console.log( 1, '初次挂载组件' )
+  ReactDOM.render(<MyComponent />, container);
+  console.log( 2, '卸载组件' )
+  ReactDOM.unmountComponentAtNode(container);
+  console.log( 3, '再次挂载组件' )
+  ReactDOM.render(<MyComponent />, container);
+  console.log( 4, '更新组件' )
+  ReactDOM.render(<MyComponent />, container);
+
+
+  /*
+  * console.log 结果
+  *
+  *
+  * */
+</script>
+</body>
+</html>

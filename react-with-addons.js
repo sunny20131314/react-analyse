@@ -3780,7 +3780,7 @@ assign(React, ReactIsomorphic);
 assign(React, {
   // ReactDOM
   findDOMNode: deprecated('findDOMNode', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.findDOMNode),
-  render: deprecated('render', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.render),
+  render: deprecated('events', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.events),
   unmountComponentAtNode: deprecated('unmountComponentAtNode', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.unmountComponentAtNode),
 
   // ReactDOMServer
@@ -9012,9 +9012,9 @@ var ReactDefaultPerf = {
         'Component class name': item.componentName,
         'Total inclusive time (ms)': roundFloat(item.inclusive),
         'Exclusive mount time (ms)': roundFloat(item.exclusive),
-        'Exclusive render time (ms)': roundFloat(item.render),
+        'Exclusive render time (ms)': roundFloat(item.events),
         'Mount time per instance (ms)': roundFloat(item.exclusive / item.count),
-        'Render time per instance (ms)': roundFloat(item.render / item.count),
+        'Render time per instance (ms)': roundFloat(item.events / item.count),
         'Instances': item.count
       };
     }));
@@ -9166,7 +9166,7 @@ var ReactDefaultPerf = {
         totalTime = performanceNow() - start;
 
         if (isRender) {
-          addValue(entry.render, rootNodeID, totalTime);
+          addValue(entry.events, rootNodeID, totalTime);
         } else if (isMount) {
           var subMountTime = mountStack.pop();
           mountStack[mountStack.length - 1] += totalTime;
@@ -9270,8 +9270,8 @@ function getExclusiveSummary(measurements) {
         render: 0,
         count: 0
       };
-      if (measurement.render[id]) {
-        candidates[displayName].render += measurement.render[id];
+      if (measurement.events[id]) {
+        candidates[displayName].render += measurement.events[id];
       }
       if (measurement.exclusive[id]) {
         candidates[displayName].exclusive += measurement.exclusive[id];
@@ -11662,7 +11662,7 @@ var ReactMount = {
     var containerHasNonRootReactChild = hasNonRootReactChild(container);
 
     if ("development" !== 'production') {
-      "development" !== 'production' ? warning(!containerHasNonRootReactChild, 'render(...): Replacing React-rendered children with a new root ' + 'component. If you intended to update the children of this node, ' + 'you should instead have the existing children update their state ' + 'and render the new components instead of calling ReactDOM.render.') : undefined;
+      "development" !== 'production' ? warning(!containerHasNonRootReactChild, 'render(...): Replacing React-rendered children with a new root ' + 'component. If you intended to update the children of this node, ' + 'you should instead have the existing children update their state ' + 'and render the new components instead of calling ReactDOM.events.') : undefined;
 
       if (!containerHasReactMarkup || reactRootElement.nextSibling) {
         var rootElementSibling = reactRootElement;
@@ -14171,7 +14171,7 @@ var ReactTestUtils = {
     // clean up, so we're going to stop honoring the name of this method
     // (and probably rename it eventually) if no problems arise.
     // document.documentElement.appendChild(div);
-    return ReactDOM.render(instance, div);
+    return ReactDOM.events(instance, div);
   },
 
   isElement: function (element) {
@@ -14196,7 +14196,7 @@ var ReactTestUtils = {
       // this returns when we have DOM nodes as refs directly
       return false;
     }
-    return inst != null && typeof inst.render === 'function' && typeof inst.setState === 'function';
+    return inst != null && typeof inst.events === 'function' && typeof inst.setState === 'function';
   },
 
   isCompositeComponentWithType: function (inst, type) {
@@ -14216,7 +14216,7 @@ var ReactTestUtils = {
     // We check the prototype of the type that will get mounted, not the
     // instance itself. This is a future proof way of duck typing.
     var prototype = inst.type.prototype;
-    return typeof prototype.render === 'function' && typeof prototype.setState === 'function';
+    return typeof prototype.events === 'function' && typeof prototype.setState === 'function';
   },
 
   isCompositeComponentElementWithType: function (inst, type) {
@@ -14346,7 +14346,7 @@ var ReactTestUtils = {
   mockComponent: function (module, mockTagName) {
     mockTagName = mockTagName || module.mockTagName || 'div';
 
-    module.prototype.render.mockImplementation(function () {
+    module.prototype.events.mockImplementation(function () {
       return React.createElement(mockTagName, null, this.props.children);
     });
 

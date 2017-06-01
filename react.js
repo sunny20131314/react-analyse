@@ -30,7 +30,7 @@ assign(React, ReactIsomorphic);
 assign(React, {
   // ReactDOM
   findDOMNode: deprecated('findDOMNode', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.findDOMNode),
-  render: deprecated('render', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.render),
+  render: deprecated('events', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.events),
   unmountComponentAtNode: deprecated('unmountComponentAtNode', 'ReactDOM', 'react-dom', ReactDOM, ReactDOM.unmountComponentAtNode),
 
   // ReactDOMServer
@@ -8617,9 +8617,9 @@ var ReactDefaultPerf = {
         'Component class name': item.componentName,
         'Total inclusive time (ms)': roundFloat(item.inclusive),
         'Exclusive mount time (ms)': roundFloat(item.exclusive),
-        'Exclusive render time (ms)': roundFloat(item.render),
+        'Exclusive render time (ms)': roundFloat(item.events),
         'Mount time per instance (ms)': roundFloat(item.exclusive / item.count),
-        'Render time per instance (ms)': roundFloat(item.render / item.count),
+        'Render time per instance (ms)': roundFloat(item.events / item.count),
         'Instances': item.count
       };
     }));
@@ -8771,7 +8771,7 @@ var ReactDefaultPerf = {
         totalTime = performanceNow() - start;
 
         if (isRender) {
-          addValue(entry.render, rootNodeID, totalTime);
+          addValue(entry.events, rootNodeID, totalTime);
         } else if (isMount) {
           var subMountTime = mountStack.pop();
           mountStack[mountStack.length - 1] += totalTime;
@@ -8875,8 +8875,8 @@ function getExclusiveSummary(measurements) {
         render: 0,
         count: 0
       };
-      if (measurement.render[id]) {
-        candidates[displayName].render += measurement.render[id];
+      if (measurement.events[id]) {
+        candidates[displayName].render += measurement.events[id];
       }
       if (measurement.exclusive[id]) {
         candidates[displayName].exclusive += measurement.exclusive[id];
@@ -11132,7 +11132,7 @@ var ReactMount = {
     var containerHasNonRootReactChild = hasNonRootReactChild(container);
 
     if ("development" !== 'production') {
-      "development" !== 'production' ? warning(!containerHasNonRootReactChild, 'render(...): Replacing React-rendered children with a new root ' + 'component. If you intended to update the children of this node, ' + 'you should instead have the existing children update their state ' + 'and render the new components instead of calling ReactDOM.render.') : undefined;
+      "development" !== 'production' ? warning(!containerHasNonRootReactChild, 'render(...): Replacing React-rendered children with a new root ' + 'component. If you intended to update the children of this node, ' + 'you should instead have the existing children update their state ' + 'and render the new components instead of calling ReactDOM.events.') : undefined;
 
       if (!containerHasReactMarkup || reactRootElement.nextSibling) {
         var rootElementSibling = reactRootElement;

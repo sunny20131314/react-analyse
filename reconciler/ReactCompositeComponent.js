@@ -186,7 +186,7 @@ var ReactCompositeComponent = {
     var renderedElement;
 
     // Support functional components
-    if (!doConstruct && (inst == null || inst.render == null)) {
+    if (!doConstruct && (inst == null || inst.events == null)) {
       renderedElement = inst;
       if (__DEV__) {
         warning(
@@ -438,7 +438,7 @@ var ReactCompositeComponent = {
       return measureLifeCyclePerf(
         () => Component(publicProps, publicContext, updateQueue),
         this._debugID,
-        'render'
+        'events'
       );
     } else {
       return Component(publicProps, publicContext, updateQueue);
@@ -1206,7 +1206,7 @@ var ReactCompositeComponent = {
       renderedElement = measureLifeCyclePerf(
         () => inst.render(),
         this._debugID,
-        'render'
+        'events'
       );
     } else {
       renderedElement = inst.render();
