@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+  <div id="container">
+    1e32653
+  </div>
+
+  <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+  <script src="../react.min.js"> </script>
+  <script src="../react-with-addons.min.js"> </script>
+  <script src="../react-dom.min.js"> </script>
+  <script src="../jquery-2.1.3.min.js"> </script>
+  <script src="./event.js"></script>
+
+<script type="text/babel">
+  class Propagation extends React.Component {
+    alert (){
+      alert('React Alert');
+    }
+
+    stopPropagation (e){
+      console.log( e, e.nativeEvent, 'stopPropagation react');
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+    }
+    render(){
+      console.log( 'render' );
+      return (
+        <div>
+          <div onClick={this.alert}>
+            <a href="#" onClick={this.stopPropagation}>React Stop Propagation on React Event</a>
+          </div>
+          <div className="alert">
+            <a ref={ref => this._event = ref} href="#" onClick={this.stopPropagation}>React Stop Propagation on JQuery Event</a>
+          </div>
+          <div onClick={this.alert}>
+            <a href="#" className="stop-propagation">JQuery Stop Propagation on React Event</a>
+          </div>
+          <div className="alert">
+            <a href="#" className="stop-propagation">JQuery Stop Propagation on JQuery Event</a>
+          </div>
+        </div>
+      );
+    }
+
+    // method 2
+    componentDidMount() {
+//       https://github.com/erikras/react-native-listener  浏览器里的原生事件，但第三方封装过，需要查看文档
+      ReactDOM.findDOMNode(this).addEventListener('click', (event) => {
+        alert('Jquery Alert');
+      }, false);
+
+      this._event.addEventListener('click', (event) => {
+        event.stopPropagation();
+      }, false);
+    }
+
+    componentWillUnmount() {
+      ReactDOM.findDOMNode(this).removeEventListener('click');
+      this._event.removeEventListener('click');
+    }
+  };
+
+  ReactDOM.render(<Propagation />, document.getElementById('container'));
+</script>
+<script>
+  // method 1
+  $(function(){
+    $(document).on('click', '.alert', function(e){
+      console.log( e, '.stop-propagation jquery', this, e.target);
+      alert('Jquery Alert');
+    });
+
+    console.log( $('stop-propagation'), 'stop-propagation' ); // react render 之前触发
+    $('.stop-propagation').on('click', function(e){
+      console.log( e, '.stop-propagation jquery');
+      e.stopPropagation();
+    });
+  });
+</script>
+</body>
+</html>

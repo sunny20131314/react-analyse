@@ -652,7 +652,7 @@ var TodoList = React.createClass({
     };
 
     var lists = this.state.items.map(createItem);
-    var input = React.createElement("input", {onkeyup: this.onChange.bind(this), value: this.state.text});
+    var input = React.createElement("input", {onchange: this.onChange.bind(this), value: this.state.text});
     var button = React.createElement("p", {onclick: this.add.bind(this)}, 'Add#' + (this.state.items.length + 1));
     var children = lists.concat([input,button]);
 
