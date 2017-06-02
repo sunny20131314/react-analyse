@@ -169,6 +169,14 @@ var TransactionImpl = {
     return ret;
   },
 
+  /* minNote:
+   *  this.transactionWrappers： [{initialize: fn, close:fn}, {initialize: fn, close:fn}]
+   *                通过this.getTransactionWrappers()获取，
+   *                getTransactionWrappers 这个接口是 Transaction 用来获取所有需要封装的前置方法（initialize）和收尾方法（close）的
+   *  this.wrapperInitData:
+   *                保留是this.transactionWrappers 每个item初始化的成功的数组，
+   *                closeAll中根据this.wrapperInitData中的值判断是否初始化成功，成功则调用相关的close方法
+   * */
   initializeAll: function(startIndex: number): void {
     var transactionWrappers = this.transactionWrappers;
     for (var i = startIndex; i < transactionWrappers.length; i++) {
