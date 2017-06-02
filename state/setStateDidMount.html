@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>componentDidMount setState</title>
+
+</head>
+<body>
+
+<div id="container">
+  1e32653
+</div>
+
+<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+<script src="../react.min.js"> </script>
+<script src="../react-with-addons.js"> </script>
+<script src="../react-dom.min.js"> </script>
+
+<script type="text/babel">
+  class Example extends React.Component {
+    constructor() {
+      super();
+      this.state = {
+        val: 0
+      };
+    }
+
+    render() {
+      console.log( this.state.val, 'render' );
+      return null;
+    }
+
+    componentDidMount() {
+      this.setState({val: this.state.val + 1}, () => console.log(this.state.val, 'componentDidMount callback 1'));
+      console.log(this.state.val, 'componentDidMount 1');
+
+      this.setState({val: this.state.val + 1}, () => console.log(this.state.val, 'componentDidMount callback 2'));
+      console.log(this.state.val, 'componentDidMount 2');
+
+      setTimeout(() => {
+        this.setState({val: this.state.val + 1}, () => console.log(this.state.val, 'componentDidMount callback 3'));
+        console.log(this.state.val, 'componentDidMount setTimeout 1');
+
+        this.setState({val: this.state.val + 1}, () => console.log(this.state.val, 'componentDidMount callback 4'));
+        console.log(this.state.val, 'componentDidMount setTimeout 2');
+      }, 0);
+    }
+
+  };
+
+  var container = document.getElementById('container');
+
+  ReactDOM.render(<Example />, container);
+
+</script>
+</body>
+</html>

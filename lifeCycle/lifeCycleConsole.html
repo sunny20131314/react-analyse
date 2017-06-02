@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>生命周期</title>
 </head>
 <body>
 <div id="container">
@@ -15,6 +15,52 @@
 <script src="../react-dom.min.js"> </script>
 
 <script type="text/babel">
+  var MyComponent_1 = React.createClass({
+    getInitialState: function(){
+      console.log('getInitialState MyComponent_1');
+      return {};
+    },
+
+    getDefaultProps: function(){
+      console.log('getDefaultProps MyComponent_1');
+      return {};
+    },
+
+    componentWillMount: function(){
+      console.log('componentWillMount');
+    },
+
+    componentDidMount: function(){
+      console.log('componentDidMount');
+    },
+
+    componentWillReceiveProps: function(){
+      console.log('componentWillReceiveProps');
+    },
+
+    shouldComponentUpdate: function(){
+      console.log('shouldComponentUpdate');
+      return true;
+    },
+
+    componentWillUpdate: function(){
+      console.log('componentWillUpdate');
+    },
+
+    componentDidUpdate: function(){
+      console.log('componentDidUpdate');
+    },
+
+    componentWillUnmount: function(){
+      console.log('componentWillUnmount');
+    },
+
+    render: function(){
+      console.log('render');
+      return null;
+    }
+  });
+
   var MyComponent = React.createClass({
     getInitialState: function(){
       console.log('getInitialState');
@@ -69,13 +115,6 @@
   ReactDOM.render(<MyComponent />, container);
   console.log( 4, '更新组件' )
   ReactDOM.render(<MyComponent />, container);
-
-
-  /*
-  * console.log 结果
-  *
-  *
-  * */
 </script>
 </body>
 </html>
