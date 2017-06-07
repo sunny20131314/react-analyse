@@ -32,6 +32,9 @@
 
     componentDidMount() {
       this.setState({val: 1}, () => console.log(this.state.val, 'componentDidMount callback 1'));
+      // 2? 疑问 @attention
+      // 这里是因为setState中注册的回调，会在生命周期执行完毕后才执行回调~
+      // setState后state的值是在生命周期中的render执行时发生了改变~~~
       console.log(this.state.val, 'componentDidMount 1');
 
       this.setState({val: 2}, () => console.log(this.state.val, 'componentDidMount callback 2'));
@@ -46,6 +49,14 @@
       }, 0);
     }
 
+
+    componentWillUpdate() {
+      console.log(this.state.val, ' will Update.');
+    }
+
+    componentDidUpdate() {
+      console.log(this.state.val, ' did updated.');
+    }
   };
 
   var container = document.getElementById('container');

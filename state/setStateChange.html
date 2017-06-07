@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>测试 setState 后的组件变化~</title>
+</head>
+<body>
+
+<div id="container">
+</div>
+
+<p>结果证明: </p>
+<p>setState只会更新当前组件及拥有的子组件（在子组件中shouldComponentUpdate中根据传递的props是否控制是否更新~~~）~</p>
+<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+<script src="../react.min.js"> </script>
+<script src="../react-with-addons.js"> </script>
+<script src="../react-dom.min.js"> </script>
+
+<script type="text/babel">
+
+  var MyComponent = React.createClass({
+    getInitialState: function(){
+      return {val: 0};
+    },
+
+    componentWillReceiveProps: function(){
+      console.log('componentWillReceiveProps');
+    },
+
+    shouldComponentUpdate: function(){
+      console.log('shouldComponentUpdate');
+      return true;
+    },
+
+    componentWillUpdate: function(){
+      console.log('componentWillUpdate');
+    },
+
+    componentDidUpdate: function(){
+      console.log('componentDidUpdate');
+    },
+
+    componentWillUnmount: function(){
+      console.log('componentWillUnmount');
+    },
+
+    render: function(){
+      console.log('render');
+      return (
+        <div>
+          <button onClick={this._forceUpdate}>点击会强制刷新哦</button>
+          <button onClick={this._setState}>点击会setState哦</button>
+          <Children name="MyComponent"/>
+        </div>
+      )
+    },
+
+    _setState () {
+      console.log('=====================')
+      console.log( 'setState~~~' )
+      this.setState({val: 1});
+    },
+
+    _forceUpdate () {
+      console.log('=====================')
+      console.log( '_onclick div 被点击啦, 触发forceUpdate' )
+      this.forceUpdate(function() {console.log( 'forceUpdate done ' )});
+    }
+  });
+
+
+  var Children = React.createClass({
+    shouldComponentUpdate: function(){
+      console.log('Children shouldComponentUpdate', this.props.name);
+      return true;
+    },
+
+    render() {
+      console.log( 'Children render' );
+      return (
+        <div>
+          我是子元素
+        </div>
+      );
+    }
+  });
+
+  var Example = React.createClass({
+    shouldComponentUpdate: function(){
+      console.log('Example shouldComponentUpdate');
+      return true;
+    },
+
+    render() {
+      console.log( 'Container render' );
+      return (
+        <div>
+          我是根节点
+          <MyComponent/>
+          <Children/>
+        </div>
+      );
+    }
+  });
+
+  var container = document.getElementById('container');
+
+  ReactDOM.render(<Example />, container);
+
+</script>
+</body>
+</html>
