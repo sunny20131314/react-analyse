@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>React Virtual DOM Diff</title>
+  <link rel="stylesheet/less" type="text/css" href="./diff.less" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/less.js/2.5.1/less.min.js"></script>
+  <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+  <script src="../react.min.js"> </script>
+  <script src="../react-with-addons.js"> </script>
+  <script src="../react-dom.min.js"> </script>
+  <script type="text/babel" src="./diff.js"></script>
+</head>
+<body>
+<button onclick="render('shape1')">Shape 1</button>
+<button onclick="render('shape2')">Shape 2</button>
+<button onclick="render('shape3')">Shape 3</button>
+<button onclick="render('shape4')">Shape 4</button>
+<button onclick="render('shape5')">Shape 5</button>
+<button onclick="render('shape6')">Shape 6</button>
+<button onclick="render('none')">Clear</button>
+<a href="https://github.com/supnate/react-dom-diff" style="margin-left: 20px; font-size: 12px; color: red;">Fork me</a>
+<div id="react-root"></div>
+
+<span>相关shape如下：</span>
+<div id="shape1" class="container"></div>
+<div id="shape2" class="container"></div>
+<div id="shape3" class="container"></div>
+<div id="shape4" class="container"></div>
+<div id="shape5" class="container"></div>
+<div id="shape6" class="container"></div>
+</body>
+</html>
