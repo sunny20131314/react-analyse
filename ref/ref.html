@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>测试 ref的返回的内容~</title>
+</head>
+<body>
+
+<h1>结果证明: </h1>
+<h4> ref属性: 如果是在自定义组件上，则返回的是自定义组件的实例 </h4>
+<h4> ref属性: 如果是在"html标签"上，则返回的是"html标签"在真实DOM上的节点 </h4>
+
+
+<div id="container"></div>
+
+<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+<script src="../react.min.js"> </script>
+<script src="../react-with-addons.js"> </script>
+<script src="../react-dom.min.js"> </script>
+
+<script type="text/babel">
+
+  var MyComponent = React.createClass({
+    render: function(){
+      return (
+        <p> MyComponent~~~ </p>
+      )
+    },
+
+
+    canYouSee() {},
+  });
+
+
+  var Example = React.createClass({
+    componentDidMount: function(){
+      console.log(this, 'Example 实例');
+    },
+
+    render() {
+      console.log( 'Container render' );
+      return (
+        <div ref="_root">
+          <span>组件: ref中访问的是MyComponent实例~</span>
+          <MyComponent ref="_MyComponent"/>
+          <span ref="_button">html标签: ref中访问的是DOM节点</span>
+        </div>
+      );
+    },
+  });
+
+  var container = document.getElementById('container');
+
+  ReactDOM.render(<Example />, container);
+
+</script>
+</body>
+</html>
